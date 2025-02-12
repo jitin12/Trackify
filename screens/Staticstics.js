@@ -9,4 +9,4 @@ const Staticstics = () => {
   )
 }
 
-export default Staticstics
+export default Staticstics;

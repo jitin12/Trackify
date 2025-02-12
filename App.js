@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Home from './screens/home';
-import Profile from './screens/profile';
+import Log from './screens/Log';
 import Staticstics from './screens/Staticstics';
 import Settings from './screens/Settings';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,7 +16,6 @@ export default function App() {
       <Tab.Navigator screenOptions={{
         headerShown: false, tabBarStyle: {
           position: 'absolute', bottom: 0, borderRadius: 50, paddingTop: 10, backgroundColor: "#FFFFFF",
-
           shadowColor: "#000000",
           shadowOffset: {
             width: 0,
@@ -32,20 +31,19 @@ export default function App() {
           tabBarIcon: ({ focused }) => {
             return (
               <View style={{ justifyContent: 'center', alignItems: 'center' }}><AntDesign name='home' size={25} color={focused ? '#345beb' : "#000"} />
-
               </View>)
           }
         }} />
+          <Tab.Screen name="Log" component={Log} options={{
+            tabBarIcon: ({ focused }) => {
+              return (
+                <View style={{ justifyContent: 'center', alignItems: 'center' }}><AntDesign name='profile' size={25} color={focused ? '#345beb' : "#000"} /></View>)
+            }
+          }} />
         <Tab.Screen name="Statistics" component={Staticstics} options={{
           tabBarIcon: ({ focused }) => {
             return (
               <View style={{ justifyContent: 'center', alignItems: 'center' }}><AntDesign name='barchart' size={25} color={focused ? '#345beb' : "#000"} /></View>)
-          }
-        }} />
-        <Tab.Screen name="Profile" component={Profile} options={{
-          tabBarIcon: ({ focused }) => {
-            return (
-              <View style={{ justifyContent: 'center', alignItems: 'center' }}><AntDesign name='profile' size={25} color={focused ? '#345beb' : "#000"} /></View>)
           }
         }} />
         <Tab.Screen name="Settings" component={Settings} options={{
