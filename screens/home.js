@@ -58,46 +58,79 @@ export default function Home() {
 
   const getMuscleColors = (muscle) => {
     const colors = {
-      'chest': { bg: '#dbeafe', text: '#1e40af' },
-      'back': { bg: '#dcfce7', text: '#166534' },
-      'cardio': { bg: '#ffe4e6', text: '#9f1239' },
-      'lower arms': { bg: '#ffedd5', text: '#9a3412' },
-      'lower legs': { bg: '#f3e8ff', text: '#6b21a8' },
-      'neck': { bg: '#fef9c3', text: '#854d0e' },
-      'shoulders': { bg: '#e0e7ff', text: '#3730a3' },
-      'upper arms': { bg: '#fee2e2', text: '#991b1b' },
-      'upper legs': { bg: '#cffafe', text: '#155e75' },
-      'waist': { bg: '#f5f5f4', text: '#44403c' }
+      abductors:         { bg: '#ede9fe', text: '#5b21b6' },
+      abs:               { bg: '#fee2e2', text: '#b91c1c' },
+      chest:               { bg: '#fee2e2', text: '#b91c1c' },
+      adductors:         { bg: '#ecfccb', text: '#3f6212' },
+      biceps:            { bg: '#fef9c3', text: '#92400e' },
+      calves:            { bg: '#e0f2fe', text: '#0369a1' },
+      "cardiovascular system": { bg: '#f3f4f6', text: '#111827' },
+      delts:             { bg: '#ffedd5', text: '#c2410c' },
+      forearms:          { bg: '#e2e8f0', text: '#1e293b' },
+      glutes:            { bg: '#fae8ff', text: '#a21caf' },
+      hamstrings:        { bg: '#d1fae5', text: '#065f46' },
+      lats:              { bg: '#fef2f2', text: '#991b1b' },
+      "levator scapulae":{ bg: '#fefce8', text: '#854d0e' },
+      pectorals:         { bg: '#e0e7ff', text: '#3730a3' },
+      quads:             { bg: '#f0fdf4', text: '#15803d' },
+      "serratus anterior": { bg: '#fdf4ff', text: '#7e22ce' },
+      spine:             { bg: '#f3f4f6', text: '#4b5563' },
+      traps:             { bg: '#ede9fe', text: '#6b21a8' },
+      triceps:           { bg: '#fee2e2', text: '#9f1239' },
+      "upper back":      { bg: '#dbeafe', text: '#1e40af' },
     };
-
-    return colors[muscle.toLowerCase()] || { bg: '#f3f4f6', text: '#4b5563' };
+    
+    return colors[muscle] || { bg: '#f3f4f6', text: '#4b5563' };
   };
 
+   
   const handleAddExercise = async () => {
     try {
+      
+      if (!select) {
+        console.error('No exercise selected!');
+        return;  // Exit the function if `select` is null or undefined
+      }
+  
+      // Proceed if `select` is valid
       const newExercise = {
+        id: select.id,
         name: select.name,
-        gifUrl: select.gifUrl,
         target: select.target,
+        instructions: select.instructions,
         secondaryMuscles: select.secondaryMuscles,
       };
-
+  
       // Retrieve existing exercises from AsyncStorage
       const existingData = await AsyncStorage.getItem('exercises');
       const exercises = existingData ? JSON.parse(existingData) : [];
-
-      // Add the new exercise to the list
-      exercises.push(newExercise);
-
-      // Save the updated list back to AsyncStorage
-      await AsyncStorage.setItem('exercises', JSON.stringify(exercises));
-
-      console.log('Exercise added successfully!');
+  
+      // Check if the exercise is already in the list
+      if (!exercises.some(exercise => exercise.id === newExercise.id)) {
+        exercises.push(newExercise); // Add the new exercise to the array
+        await AsyncStorage.setItem('exercises', JSON.stringify(exercises)); // Save the updated list back to AsyncStorage
+        console.log('Exercise added successfully!');
+        Alert.alert(
+          "Success", 
+          "Exercise added successfully!", 
+          [{ text: "OK" }],
+          { cancelable: false }
+        );
+        console.log(await AsyncStorage.getItem('exercises'));
+      } else {
+        console.log('Exercise already exists in the list!');
+        Alert.alert(
+          "Error", 
+          "Exercise already exists!", 
+          [{ text: "OK" }],
+          { cancelable: false }
+        );
+      }
     } catch (error) {
       console.error('Error adding exercise:', error);
     }
   };
-
+  
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -121,11 +154,18 @@ export default function Home() {
               />
               <Text style={styles.modalSubtitle}>Instructions:</Text>
               <ScrollView style={styles.instructionsScroll}>
-                <Text style={styles.modalText}>{select.instructions.join("\n\n")}</Text>
+                <Text style={{color: '#000',
+  fontWeight: '400',
+  fontSize: 14,}}>{select.instructions.join("\n\n")}</Text>
               </ScrollView>
               <View style={styles.modalActions}>
                 <TouchableOpacity style={styles.addButton}>
-                  <Text style={styles.buttonText}>Add Exercise</Text>
+                  <Text style={styles.buttonText}
+                   onPress={()=>{
+                    if(select){
+                      handleAddExercise();
+                    }}
+                  }>Add Exercise</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.closeButton}
@@ -203,8 +243,8 @@ export default function Home() {
               horizontal
               contentContainerStyle={styles.exerciseScrollContent}
             >
-              {data.map((item, index) => (
-                <View key={index} style={styles.exerciseCard}>
+              {data.map((item) => (
+                <View key={item.id} style={styles.exerciseCard}>
                   <Image
                     style={styles.exerciseImage}
                     source={{ uri: item.gifUrl }}
@@ -243,19 +283,22 @@ export default function Home() {
 
                   <View style={styles.cardActions}>
                     <TouchableOpacity
-                      style={styles.iconButton}
+                      style={styles.modButton1}
                       onPress={() => {
                         setModalVisible(true);
                         setSelect(item);
                       }}
                     >
-                      <Feather name="info" size={20} color="#4b5563" />
+                    <Text style= {styles.modalText}>Info</Text>
+                    
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton} onPress={() => {
+                    <TouchableOpacity style={styles.modButton} onPress={() => {
                       setSelect(item);
-                      handleAddExercise();
+                      if(select){
+                        handleAddExercise();
+                      }
                     }}>
-                      <Feather name="plus" size={20} color="#4b5563" />
+                      <Text style ={styles.modalText}>Add Exercise</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -370,22 +413,24 @@ const styles = StyleSheet.create({
   },
   exerciseCard: {
     width: 280,
-    height: 280, // Fixed height for cards
     backgroundColor: '#ffffff',
     borderRadius: 12,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     marginRight: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+    overflow: 'hidden',
   },
   exerciseImage: {
     width: '100%',
     height: 140, // Fixed height for images
     borderRadius: 8,
     marginBottom: 12,
+    contentFit: 'contain',
   },
   exerciseName: {
     fontSize: 16,
@@ -409,15 +454,10 @@ const styles = StyleSheet.create({
   },
   cardActions: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     marginTop: 8,
   },
-  iconButton: {
-    padding: 8,
-    marginLeft: 8,
-    backgroundColor: '#f3f4f6',
-    borderRadius: 6,
-  },
+  
   footer: {
     backgroundColor: '#ffffff',
     paddingHorizontal: 16,
@@ -428,7 +468,7 @@ const styles = StyleSheet.create({
   footerAddButton: {
     backgroundColor: '#3b82f6',
     borderRadius: 8,
-    paddingVertical: 12,
+
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -488,10 +528,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   modalText: {
+    color: '#ffffff',
+    fontWeight: '500',
     fontSize: 14,
-    color: '#4b5563',
-    marginBottom: 16,
-    lineHeight: 20,
   },
   modalActions: {
     flexDirection: 'row',
@@ -505,6 +544,18 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     marginRight: 12,
+  },
+  modButton: {
+    backgroundColor: '#3b82f6',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  modButton1: {
+    backgroundColor: '#374151',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
   },
   buttonText: {
     color: '#ffffff',

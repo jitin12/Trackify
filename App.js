@@ -1,58 +1,150 @@
 import * as React from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Home from './screens/home';
 import Log from './screens/Log';
-import Staticstics from './screens/Staticstics';
+import Statistics from './screens/Staticstics';
 import Settings from './screens/Settings';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import { Feather } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
+// Custom tab button component for cleaner, more consistent design
+const TabBarIcon = ({ name, focused }) => {
+  return (
+    <View style={[
+      styles.iconContainer,
+      focused && styles.iconContainerFocused
+    ]}>
+      <Feather 
+        name={name} 
+        size={20} 
+        color={focused ? '#000000' : '#9ca3af'} 
+      />
+    </View>
+  );
+};
+
+// Custom label component for tab navigation
+const TabBarLabel = ({ label, focused }) => {
+  return (
+    <Text style={[
+      styles.tabLabel,
+      focused && styles.tabLabelFocused
+    ]}>
+      {label}
+    </Text>
+  );
+};
+
 export default function App() {
   return (
-    <NavigationContainer>
-      <Tab.Navigator screenOptions={{
-        headerShown: false, tabBarStyle: {
-          position: 'absolute', bottom: 0, borderRadius: 50, paddingTop: 10, backgroundColor: "#FFFFFF",
-          shadowColor: "#000000",
-          shadowOffset: {
-            width: 0,
-            height: -1,
-          },
-          shadowOpacity: 0.20,
-          shadowRadius: 7,
-          elevation: 2,
-          justifyContent: 'center', alignItems: 'center'
-        },
-      }}>
-        <Tab.Screen name="Home" component={Home} options={{
-          tabBarIcon: ({ focused }) => {
-            return (
-              <View style={{ justifyContent: 'center', alignItems: 'center' }}><AntDesign name='home' size={25} color={focused ? '#345beb' : "#000"} />
-              </View>)
-          }
-        }} />
-          <Tab.Screen name="Log" component={Log} options={{
-            tabBarIcon: ({ focused }) => {
-              return (
-                <View style={{ justifyContent: 'center', alignItems: 'center' }}><AntDesign name='profile' size={25} color={focused ? '#345beb' : "#000"} /></View>)
-            }
-          }} />
-        <Tab.Screen name="Statistics" component={Staticstics} options={{
-          tabBarIcon: ({ focused }) => {
-            return (
-              <View style={{ justifyContent: 'center', alignItems: 'center' }}><AntDesign name='barchart' size={25} color={focused ? '#345beb' : "#000"} /></View>)
-          }
-        }} />
-        <Tab.Screen name="Settings" component={Settings} options={{
-          tabBarIcon: ({ focused }) => {
-            return (
-              <View style={{ justifyContent: 'center', alignItems: 'center' }}><AntDesign name='setting' size={25} color={focused ? '#345beb' : "#000"} /></View>)
-          }
-        }} />
+    <NavigationContainer style={styles.container}>
+      <Tab.Navigator 
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: styles.tabBar,
+          tabBarShowLabel: true,
+          tabBarActiveTintColor: '#000000',
+          tabBarInactiveTintColor: '#9ca3af',
+        }}
+      >
+        <Tab.Screen 
+          name="Home" 
+          component={Home} 
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon name="home" focused={focused} />
+            ),
+            tabBarLabel: ({ focused }) => (
+              <TabBarLabel label="Home" focused={focused} />
+            )
+          }} 
+        />
+        <Tab.Screen 
+          name="Log" 
+          component={Log} 
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon name="clipboard" focused={focused} />
+            ),
+            tabBarLabel: ({ focused }) => (
+              <TabBarLabel label="Log" focused={focused} />
+            )
+          }} 
+        />
+        <Tab.Screen 
+          name="Statistics" 
+          component={Statistics} 
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon name="bar-chart-2" focused={focused} />
+            ),
+            tabBarLabel: ({ focused }) => (
+              <TabBarLabel label="Stats" focused={focused} />
+            )
+          }} 
+        />
+        <Tab.Screen 
+          name="Settings" 
+          component={Settings} 
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon name="settings" focused={focused} />
+            ),
+            tabBarLabel: ({ focused }) => (
+              <TabBarLabel label="Settings" focused={focused} />
+            )
+          }} 
+        />
       </Tab.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+  },
+  tabBar: {
+    backgroundColor: '#ffffff',
+    borderTopWidth: 0,
+    elevation: 5,
+    height: 90,
+    paddingBottom: 10,
+    borderRadius : 30,
+    paddingTop: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    width: '100%',
+    position: 'absolute',
+  },
+  iconContainer: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderRadius: 10,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  iconContainerFocused: {
+    backgroundColor: '#f5f5f5',
+  },
+  tabLabel: {
+    color: '#9ca3af',
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  tabLabelFocused: {
+    color: '#000000',
+    fontWeight: '600',
+  },
+});

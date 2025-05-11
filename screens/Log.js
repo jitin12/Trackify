@@ -12,29 +12,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 
-const defaultData = [
-  {
-    id: 1,
-    name: 'Bench Press',
-    muscle: 'Chest',
-    sets: [{ weight: 135, reps: 10 }, { weight: 155, reps: 8 }],
-    expanded: false,
-  },
-  {
-    id: 2,
-    name: 'Squat',
-    muscle: 'Legs',
-    sets: [{ weight: 185, reps: 8 }],
-    expanded: false,
-  },
-  {
-    id: 3,
-    name: 'Pull-ups',
-    muscle: 'Back',
-    sets: [{ weight: 0, reps: 12 }, { weight: 0, reps: 10 }],
-    expanded: false,
-  },
-];
+
 
 const STORAGE_KEY = 'exercises';
 
@@ -43,11 +21,11 @@ export default function ExerciseTracker() {
   const [newSetData, setNewSetData] = useState({});
 
   // Load exercises on app load
-  useEffect(() => {
+
     const loadExercises = async () => {
       try {
         const storedExercises = await AsyncStorage.getItem(STORAGE_KEY);
-        console.log('Stored exercises from AsyncStorage:', storedExercises);  // Log AsyncStorage data
+        // console.log('Stored exercises from AsyncStorage:', storedExercises);  // Log AsyncStorage data
 
         if (storedExercises) {
           let parsedExercises = JSON.parse(storedExercises);
@@ -58,12 +36,10 @@ export default function ExerciseTracker() {
             sets: Array.isArray(ex.sets) ? ex.sets : [], // Ensure sets is always an array
           }));
 
-          setExercises(parsedExercises);
+          await setExercises(parsedExercises);
         } else {
           // If no data is found in AsyncStorage, use defaultData and store it
-          console.log('No exercises found in AsyncStorage, using default data');
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
-          setExercises(defaultData);
+          console.log('No exercises found in AsyncStorage');
         }
       } catch (error) {
         console.error('Error loading exercises from AsyncStorage:', error);
@@ -71,7 +47,10 @@ export default function ExerciseTracker() {
     };
 
     loadExercises();
-  }, []);
+
+    useEffect(() => {
+      loadExercises();
+    },[ ]);
 
   // Save exercises & update UI
   const saveExercises = async (updated) => {
@@ -82,6 +61,11 @@ export default function ExerciseTracker() {
     } catch (error) {
       console.error('Error saving exercises to AsyncStorage:', error);
     }
+  };
+
+  const removeExercise = async (id) => {
+    const updated = exercises.filter((ex) => ex.id !== id);
+    await saveExercises(updated);
   };
 
   const handleInputChange = (id, field, value) => {
@@ -114,14 +98,14 @@ export default function ExerciseTracker() {
       return;
     }
 
-    const updated = exercises.map((ex) => {
-      if (ex.id !== id) return ex; // Don't update others
-      return {
-        ...ex,
-        sets: [...ex.sets, { weight, reps }],
-      };
-    });
-    
+    const updated = exercises.map((ex) =>
+      ex.id === id
+        ? {
+          ...ex,
+          sets: [...ex.sets, { weight, reps }],
+        }
+        : ex
+    );
     setNewSetData((prev) => ({ ...prev, [id]: { weight: '', reps: '' } })); // Reset inputs
     saveExercises(updated);
   };
@@ -137,13 +121,27 @@ export default function ExerciseTracker() {
 
   const getMuscleColors = (muscle) => {
     const colors = {
-      Chest: { bg: '#dbeafe', text: '#1e40af' },
-      Legs: { bg: '#f3e8ff', text: '#6b21a8' },
-      Back: { bg: '#dcfce7', text: '#166534' },
-      Shoulders: { bg: '#fef9c3', text: '#854d0e' },
-      Arms: { bg: '#fee2e2', text: '#991b1b' },
-      Core: { bg: '#e0e7ff', text: '#3730a3' },
+      abductors:         { bg: '#ede9fe', text: '#5b21b6' },
+      abs:               { bg: '#fee2e2', text: '#b91c1c' },
+      adductors:         { bg: '#ecfccb', text: '#3f6212' },
+      biceps:            { bg: '#fef9c3', text: '#92400e' },
+      calves:            { bg: '#e0f2fe', text: '#0369a1' },
+      "cardiovascular system": { bg: '#f3f4f6', text: '#111827' },
+      delts:             { bg: '#ffedd5', text: '#c2410c' },
+      forearms:          { bg: '#e2e8f0', text: '#1e293b' },
+      glutes:            { bg: '#fae8ff', text: '#a21caf' },
+      hamstrings:        { bg: '#d1fae5', text: '#065f46' },
+      lats:              { bg: '#fef2f2', text: '#991b1b' },
+      "levator scapulae":{ bg: '#fefce8', text: '#854d0e' },
+      pectorals:         { bg: '#e0e7ff', text: '#3730a3' },
+      quads:             { bg: '#f0fdf4', text: '#15803d' },
+      "serratus anterior": { bg: '#fdf4ff', text: '#7e22ce' },
+      spine:             { bg: '#f3f4f6', text: '#4b5563' },
+      traps:             { bg: '#ede9fe', text: '#6b21a8' },
+      triceps:           { bg: '#fee2e2', text: '#9f1239' },
+      "upper back":      { bg: '#dbeafe', text: '#1e40af' },
     };
+    
     return colors[muscle] || { bg: '#f3f4f6', text: '#4b5563' };
   };
 
@@ -151,7 +149,6 @@ export default function ExerciseTracker() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <Text style={styles.headerTitle}>My Exercises</Text>
-
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
         {exercises.map((exercise) => (
           <View key={exercise.id} style={styles.exerciseCard}>
@@ -159,14 +156,14 @@ export default function ExerciseTracker() {
               style={styles.exerciseHeader}
               onPress={() => toggleExpand(exercise.id)}
             >
-              <View>
-                <Text style={styles.exerciseName}>{exercise.name.toUpperCase()}</Text>
+              <View style ={styles.exercisehead}>
+                <Text style={styles.exerciseName}>{exercise.name?exercise.name.toUpperCase() : ''}</Text>
                 <View style={styles.exerciseMetaContainer}>
                   <View
-                    style={[styles.muscleBadge, { backgroundColor: getMuscleColors(exercise.muscle).bg }]}
+                    style={[styles.muscleBadge, { backgroundColor: getMuscleColors(exercise.target).bg ? getMuscleColors(exercise.target).bg : '#f3f4f6' }]}
                   >
-                    <Text style={[styles.muscleText, { color: getMuscleColors(exercise.muscle).text }]}>
-                      {exercise.muscle}
+                    <Text style={[styles.muscleText, { color: getMuscleColors(exercise.target).text }]}>
+                      {exercise.target?exercise.target.toUpperCase() : ''}
                     </Text>
                   </View>
                   <Text style={styles.setsCount}>
@@ -174,12 +171,17 @@ export default function ExerciseTracker() {
                   </Text>
                 </View>
               </View>
-              <Feather
-                name="chevron-right"
-                size={20}
-                color="#9ca3af"
-                style={[styles.chevron, exercise.expanded && styles.chevronExpanded]}
-              />
+              <View style={styles.headerActions}>
+                <TouchableOpacity onPress={() => removeExercise(exercise.id)} style={styles.removeExerciseBtn}>
+                  <Feather name="trash-2" size={18} color="#ef4444" />
+                </TouchableOpacity>
+                <Feather
+                  name="chevron-right"
+                  size={20}
+                  color="#9ca3af"
+                  style={[styles.chevron, exercise.expanded && styles.chevronExpanded]}
+                />
+              </View>
             </TouchableOpacity>
 
             {exercise.expanded && (
@@ -258,6 +260,9 @@ const styles = StyleSheet.create({
   },
   exerciseCard: {
     backgroundColor: '#ffffff',
+    flex : 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     borderRadius: 8,
     marginBottom: 12,
     borderWidth: 1,
@@ -269,7 +274,11 @@ const styles = StyleSheet.create({
     elevation: 1,
     overflow: 'hidden',
   },
+  exercisehead: {
+    width : '80%',
+  },
   exerciseHeader: {
+    flex : 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -279,6 +288,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: '#111827',
+    marginBottom: 4,
   },
   exerciseMetaContainer: {
     flexDirection: 'row',
@@ -329,6 +339,7 @@ const styles = StyleSheet.create({
   },
   weightCol: {
     flex: 1,
+     marginRight: 8,
   },
   repsCol: {
     flex: 1,
@@ -378,6 +389,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#f3f4f6',
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  removeExerciseBtn: {
+    padding: 4,
+  },
+
   addButton: {
     backgroundColor: '#3b82f6',
     borderRadius: 8,
