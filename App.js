@@ -3,14 +3,15 @@ import { Text, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Home from './screens/home';
 import Log from './screens/Log';
-import Statistics from './screens/Staticstics';
+import StatsPage from './screens/Staticstics';
 import Settings from './screens/Settings';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
+import { ExerciseProvider } from './screens/exerciseContext';
+
 
 const Tab = createBottomTabNavigator();
 
-// Custom tab button component for cleaner, more consistent design
 const TabBarIcon = ({ name, focused }) => {
   return (
     <View style={[
@@ -40,6 +41,9 @@ const TabBarLabel = ({ label, focused }) => {
 
 export default function App() {
   return (
+    
+      <ExerciseProvider>
+
     <NavigationContainer style={styles.container}>
       <Tab.Navigator 
         screenOptions={{
@@ -49,7 +53,7 @@ export default function App() {
           tabBarActiveTintColor: '#000000',
           tabBarInactiveTintColor: '#9ca3af',
         }}
-      >
+        >
         <Tab.Screen 
           name="Home" 
           component={Home} 
@@ -61,7 +65,7 @@ export default function App() {
               <TabBarLabel label="Home" focused={focused} />
             )
           }} 
-        />
+          />
         <Tab.Screen 
           name="Log" 
           component={Log} 
@@ -76,7 +80,7 @@ export default function App() {
         />
         <Tab.Screen 
           name="Statistics" 
-          component={Statistics} 
+          component={StatsPage} 
           options={{
             tabBarIcon: ({ focused }) => (
               <TabBarIcon name="bar-chart-2" focused={focused} />
@@ -97,9 +101,10 @@ export default function App() {
               <TabBarLabel label="Settings" focused={focused} />
             )
           }} 
-        />
+          />
       </Tab.Navigator>
     </NavigationContainer>
+          </ExerciseProvider>
   );
 }
 

@@ -5,7 +5,6 @@ import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Get screen dimensions
 const { width } = Dimensions.get('window');
 
 export default function Home() {
@@ -58,41 +57,87 @@ export default function Home() {
 
   const getMuscleColors = (muscle) => {
     const colors = {
-      abductors:         { bg: '#ede9fe', text: '#5b21b6' },
-      abs:               { bg: '#fee2e2', text: '#b91c1c' },
-      chest:               { bg: '#fee2e2', text: '#b91c1c' },
-      adductors:         { bg: '#ecfccb', text: '#3f6212' },
-      biceps:            { bg: '#fef9c3', text: '#92400e' },
-      calves:            { bg: '#e0f2fe', text: '#0369a1' },
+      abductors: { bg: '#ede9fe', text: '#5b21b6' },
+      abs: { bg: '#fee2e2', text: '#b91c1c' },
+      chest: { bg: '#fee2e2', text: '#b91c1c' },
+      adductors: { bg: '#ecfccb', text: '#3f6212' },
+      biceps: { bg: '#fef9c3', text: '#92400e' },
+      calves: { bg: '#e0f2fe', text: '#0369a1' },
       "cardiovascular system": { bg: '#f3f4f6', text: '#111827' },
-      delts:             { bg: '#ffedd5', text: '#c2410c' },
-      forearms:          { bg: '#e2e8f0', text: '#1e293b' },
-      glutes:            { bg: '#fae8ff', text: '#a21caf' },
-      hamstrings:        { bg: '#d1fae5', text: '#065f46' },
-      lats:              { bg: '#fef2f2', text: '#991b1b' },
-      "levator scapulae":{ bg: '#fefce8', text: '#854d0e' },
-      pectorals:         { bg: '#e0e7ff', text: '#3730a3' },
-      quads:             { bg: '#f0fdf4', text: '#15803d' },
+      delts: { bg: '#ffedd5', text: '#c2410c' },
+      forearms: { bg: '#e2e8f0', text: '#1e293b' },
+      glutes: { bg: '#fae8ff', text: '#a21caf' },
+      hamstrings: { bg: '#d1fae5', text: '#065f46' },
+      lats: { bg: '#fef2f2', text: '#991b1b' },
+      "levator scapulae": { bg: '#fefce8', text: '#854d0e' },
+      pectorals: { bg: '#e0e7ff', text: '#3730a3' },
+      quads: { bg: '#f0fdf4', text: '#15803d' },
       "serratus anterior": { bg: '#fdf4ff', text: '#7e22ce' },
-      spine:             { bg: '#f3f4f6', text: '#4b5563' },
-      traps:             { bg: '#ede9fe', text: '#6b21a8' },
-      triceps:           { bg: '#fee2e2', text: '#9f1239' },
-      "upper back":      { bg: '#dbeafe', text: '#1e40af' },
+      spine: { bg: '#f3f4f6', text: '#4b5563' },
+      traps: { bg: '#ede9fe', text: '#6b21a8' },
+      triceps: { bg: '#fee2e2', text: '#9f1239' },
+      "upper back": { bg: '#dbeafe', text: '#1e40af' },
     };
-    
+
     return colors[muscle] || { bg: '#f3f4f6', text: '#4b5563' };
   };
+  const renderExerciseCard = (item) => (
+    <View key={item.id} style={styles.exerciseCard}>
+      <Image
+        style={styles.exerciseImage}
+        source={{ uri: item.gifUrl }}
+      />
+      <Text numberOfLines={3} style={styles.exerciseName}>
+        {item.name.toUpperCase()}
+      </Text>
 
-   
+      <View style={styles.tagContainer}>
+        <View style={[styles.tag, { backgroundColor: getMuscleColors(item.target).bg }]}>
+          <Text numberOfLines={4} style={[styles.tagText, { color: getMuscleColors(item.target).text }]}>
+            {item.target.toUpperCase()}
+          </Text>
+        </View>
+        {item.secondaryMuscles.length > 0 && (
+          <View style={[styles.tag, { backgroundColor: getMuscleColors(item.secondaryMuscles[0]).bg }]}>
+            <Text numberOfLines={4} style={[styles.tagText, { color: getMuscleColors(item.secondaryMuscles[0]).text }]}>
+              {item.secondaryMuscles[0].toUpperCase()}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.cardActions}>
+        <TouchableOpacity
+          style={styles.modButton1}
+          onPress={() => {
+            setModalVisible(true);
+            setSelect(item);
+          }}
+        >
+           <Feather name="info" size={20} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.modButton}
+          onPress={() => {
+            setSelect(item);
+            handleAddExercise();
+          }}
+        >
+           <Feather name="plus-circle" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+
   const handleAddExercise = async () => {
     try {
-      
+
       if (!select) {
         console.error('No exercise selected!');
-        return;  // Exit the function if `select` is null or undefined
+        return;  
       }
-  
-      // Proceed if `select` is valid
+
       const newExercise = {
         id: select.id,
         name: select.name,
@@ -100,19 +145,17 @@ export default function Home() {
         instructions: select.instructions,
         secondaryMuscles: select.secondaryMuscles,
       };
-  
-      // Retrieve existing exercises from AsyncStorage
+
       const existingData = await AsyncStorage.getItem('exercises');
       const exercises = existingData ? JSON.parse(existingData) : [];
-  
-      // Check if the exercise is already in the list
+
       if (!exercises.some(exercise => exercise.id === newExercise.id)) {
-        exercises.push(newExercise); // Add the new exercise to the array
-        await AsyncStorage.setItem('exercises', JSON.stringify(exercises)); // Save the updated list back to AsyncStorage
+        exercises.push(newExercise); 
+        await AsyncStorage.setItem('exercises', JSON.stringify(exercises)); 
         console.log('Exercise added successfully!');
         Alert.alert(
-          "Success", 
-          "Exercise added successfully!", 
+          "Success",
+          "Exercise added successfully!",
           [{ text: "OK" }],
           { cancelable: false }
         );
@@ -120,8 +163,8 @@ export default function Home() {
       } else {
         console.log('Exercise already exists in the list!');
         Alert.alert(
-          "Error", 
-          "Exercise already exists!", 
+          "Error",
+          "Exercise already exists!",
           [{ text: "OK" }],
           { cancelable: false }
         );
@@ -130,7 +173,7 @@ export default function Home() {
       console.error('Error adding exercise:', error);
     }
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
@@ -154,18 +197,21 @@ export default function Home() {
               />
               <Text style={styles.modalSubtitle}>Instructions:</Text>
               <ScrollView style={styles.instructionsScroll}>
-                <Text style={{color: '#000',
-  fontWeight: '400',
-  fontSize: 14,}}>{select.instructions.join("\n\n")}</Text>
+                <Text style={{
+                  color: '#000',
+                  fontWeight: '400',
+                  fontSize: 14,
+                }}>{select.instructions.join("\n\n")}</Text>
               </ScrollView>
               <View style={styles.modalActions}>
                 <TouchableOpacity style={styles.addButton}>
                   <Text style={styles.buttonText}
-                   onPress={()=>{
-                    if(select){
-                      handleAddExercise();
-                    }}
-                  }>Add Exercise</Text>
+                    onPress={() => {
+                      if (select) {
+                        handleAddExercise();
+                      }
+                    }
+                    }>Add Exercise</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.closeButton}
@@ -237,74 +283,22 @@ export default function Home() {
           </View>
 
           {/* Exercise Cards */}
-          <View style={styles.exerciseListContainer}>
-            <ScrollView
-              showsHorizontalScrollIndicator={false}
-              horizontal
-              contentContainerStyle={styles.exerciseScrollContent}
-            >
-              {data.map((item) => (
-                <View key={item.id} style={styles.exerciseCard}>
-                  <Image
-                    style={styles.exerciseImage}
-                    source={{ uri: item.gifUrl }}
-                  />
-
-                  <Text numberOfLines={1} style={styles.exerciseName}>
-                    {item.name.toUpperCase()}
-                  </Text>
-
-                  <View style={styles.tagContainer}>
-                    <View style={[
-                      styles.tag,
-                      { backgroundColor: getMuscleColors(item.target).bg }
-                    ]}>
-                      <Text style={[
-                        styles.tagText,
-                        { color: getMuscleColors(item.target).text }
-                      ]}>
-                        {item.target.toUpperCase()}
-                      </Text>
-                    </View>
-                    {item.secondaryMuscles.length > 0 && (
-                      <View style={[
-                        styles.tag,
-                        { backgroundColor: getMuscleColors(item.secondaryMuscles[0]).bg }
-                      ]}>
-                        <Text style={[
-                          styles.tagText,
-                          { color: getMuscleColors(item.secondaryMuscles[0]).text }
-                        ]}>
-                          {item.secondaryMuscles[0].toUpperCase()}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <View style={styles.cardActions}>
-                    <TouchableOpacity
-                      style={styles.modButton1}
-                      onPress={() => {
-                        setModalVisible(true);
-                        setSelect(item);
-                      }}
-                    >
-                    <Text style= {styles.modalText}>Info</Text>
-                    
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.modButton} onPress={() => {
-                      setSelect(item);
-                      if(select){
-                        handleAddExercise();
-                      }
-                    }}>
-                      <Text style ={styles.modalText}>Add Exercise</Text>
-                    </TouchableOpacity>
-                  </View>
+          <View style={styles.masonryContainer}>
+            <ScrollView contentContainerStyle={styles.masonryScroll}>
+              <View style={styles.masonryColumns}>
+                {/* Left column */}
+                <View style={styles.masonryColumn}>
+                  {data.filter((_, index) => index % 2 === 0).map(item => renderExerciseCard(item))}
                 </View>
-              ))}
+
+                {/* Right column */}
+                <View style={styles.masonryColumn}>
+                  {data.filter((_, index) => index % 2 !== 0).map(item => renderExerciseCard(item))}
+                </View>
+              </View>
             </ScrollView>
           </View>
+
         </View>
       )}
 
@@ -314,6 +308,23 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
+  masonryContainer: {
+    flex: 1,
+    paddingHorizontal: 8,
+    marginTop: 16,
+  },
+  masonryScroll: {
+    paddingBottom: 80,
+  },
+  masonryColumns: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  masonryColumn: {
+    flex: 1,
+    paddingHorizontal: 4,
+  },
+
   container: {
     flex: 1,
     backgroundColor: '#f9fafb',
@@ -323,7 +334,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '700',
     color: '#111827',
-    paddingTop: 30,
+    marginTop: 30,
     paddingHorizontal: 16
   },
   searchContainer: {
@@ -404,7 +415,7 @@ const styles = StyleSheet.create({
   },
   // New container for exercise list with fixed height
   exerciseListContainer: {
-    height: 320, // Fixed height for the exercise list container
+    // height: 320, // Fixed height for the exercise list container
     marginTop: 16,
   },
   exerciseScrollContent: {
@@ -412,18 +423,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   exerciseCard: {
-    width: 280,
     backgroundColor: '#ffffff',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginRight: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
     overflow: 'hidden',
+    marginBottom: 16,
   },
   exerciseImage: {
     width: '100%',
@@ -433,7 +443,7 @@ const styles = StyleSheet.create({
     contentFit: 'contain',
   },
   exerciseName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#111827',
     marginBottom: 8,
@@ -447,6 +457,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 16,
     marginRight: 8,
+    overflow: 'hidden',
+    maxWidth: 70,
   },
   tagText: {
     fontSize: 10,
@@ -457,7 +469,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 8,
   },
-  
+
   footer: {
     backgroundColor: '#ffffff',
     paddingHorizontal: 16,
@@ -549,13 +561,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#3b82f6',
     borderRadius: 8,
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
   },
   modButton1: {
     backgroundColor: '#374151',
     borderRadius: 8,
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#ffffff',

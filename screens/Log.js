@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect ,useContext} from 'react';
 import {
   SafeAreaView,
   View,
@@ -11,13 +11,14 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
-
+import ExerciseContext from './exerciseContext';
 
 
 const STORAGE_KEY = 'exercises';
 
-export default function ExerciseTracker() {
-  const [exercises, setExercises] = useState([]);
+export default function Log() {
+  // const [exercises, setExercises] = useState([]);
+  const { exercises, setExercises } = useContext(ExerciseContext); // ✅
   const [newSetData, setNewSetData] = useState({});
 
   // Load exercises on app load
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '700',
     color: '#111827',
-    paddingTop: 30,
+    marginTop: 30,
     paddingHorizontal: 16,
   },
   scrollView: {
