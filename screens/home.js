@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Modal, Alert, StatusBar, SafeAreaView, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Modal, Alert, StatusBar, SafeAreaView,ActivityIndicator ,Dimensions } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import axios from 'axios';
 import { Image } from 'expo-image';
@@ -119,8 +119,7 @@ export default function Home() {
         <TouchableOpacity
           style={styles.modButton}
           onPress={() => {
-            setSelect(item);
-            handleAddExercise();
+            handleAddExercise(item);
           }}
         >
            <Feather name="plus-circle" size={20} color="#fff" />
@@ -130,20 +129,20 @@ export default function Home() {
   );
 
 
-  const handleAddExercise = async () => {
+  const handleAddExercise = async (item) => {
     try {
 
-      if (!select) {
+      if (!item) {
         console.error('No exercise selected!');
         return;  
       }
 
       const newExercise = {
-        id: select.id,
-        name: select.name,
-        target: select.target,
-        instructions: select.instructions,
-        secondaryMuscles: select.secondaryMuscles,
+        id: item.id,
+        name: item.name,
+        target: item.target,
+        instructions: item.instructions,
+        secondaryMuscles: item.secondaryMuscles,
       };
 
       const existingData = await AsyncStorage.getItem('exercises');
@@ -208,7 +207,7 @@ export default function Home() {
                   <Text style={styles.buttonText}
                     onPress={() => {
                       if (select) {
-                        handleAddExercise();
+                        handleAddExercise(select);
                       }
                     }
                     }>Add Exercise</Text>
@@ -249,8 +248,9 @@ export default function Home() {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
+                <ActivityIndicator size="large" color="#4895ef" />
+                <Text style={styles.loadingText}>Loading exercises...</Text>
+              </View>
       ) : (
         <View style={styles.contentContainer}>
           {/* Body Part Filter */}
@@ -353,6 +353,17 @@ const styles = StyleSheet.create({
   },
   searchIcon: {
     marginRight: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#64748b',
   },
   searchInput: {
     flex: 1,
